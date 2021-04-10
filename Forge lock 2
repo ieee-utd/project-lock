@@ -3,18 +3,19 @@
 
 //These are the pins variables4
 #define Redpin 6
-#define Bluepin 3
+
 #define Greenpin 5
 const int buttonPin = 19;
 const int servoPin  = 18;
 const int sensorClosed = 21;
-const int RFIDgood = 23;
-const int RFIDbad = 15;
+const int RFIDpin = 23;
+
+
 
 
 
 //These are the other variables
-int startTime, buttonPosition, RFIDgoodcheck ,RFIDbadcheck, closedCheck, servoPosition,RFIDstartTime,startTimebad,wakeupbutton,open1,closed; 
+int startTime, buttonPosition, RFIDcheck, closedCheck, servoPosition,RFIDstartTimef,open1,closed; 
 
 //This is the servo
 Servo myservo;
@@ -25,8 +26,8 @@ void setup()
   //Variables not pins
   closed = 90;
   open1 = 0;
-  RFIDgoodcheck = 0;
-  RFIDbadcheck = 0;
+  RFIDcheck = 0;
+//  RFIDbadcheck = 0;
   buttonPosition =0;
   closedCheck = 0;
   servoPosition = 0;
@@ -37,13 +38,13 @@ void setup()
   myservo.write(0);   // Represents a closed lock
   myservo.attach(servoPin);
   
-  pinMode(Bluepin,OUTPUT);
+ 
   pinMode(Redpin,OUTPUT);
   pinMode(Greenpin,OUTPUT);
   
   pinMode(buttonPin, INPUT);
-  pinMode(RFIDgood, INPUT);
-  pinMode(RFIDbad,INPUT);
+  pinMode(RFIDpin, INPUT);
+  
   
 }
 void loop()
@@ -52,17 +53,18 @@ void loop()
   
   
   /////THIS IS THE WAKE UP SEQUENCE\\\\\\
-  /// We need wakeupbutton and buttonpin to be 
+  /// We need buttonpin to be the pin that wakes up the system 
   /// We need to add the wake up part\\\
 
   servoPosition = myservo.read(); 
   
   if((digitalRead(buttonPin)==HIGH)&&(buttonPosition == 0)){  //This is if someone wants to scan a card
     // If the Scan is good
-      RFIDgoodcheck = RFIDscan(RFIDgood,RFIDgoodcheck,0,250,0,0);  
+      RFIDcheck = RFIDscan(RFIDpin,RFIDcheck,0,250,0,0);  
     // If the Scan is bad
-      RFIDbadcheck = RFIDscan(RFIDbad,RFIDbadcheck,250,0,250,90);
+    if(RFIDcheck ==0){
       buttonPosition = 1;
+  }
   }
   if(digitalRead(sensorClosed)==HIGH){
   if((digitalRead(buttonPin)==HIGH)&&(buttonPosition ==1)){ //This is if somone presses the lock button
@@ -82,7 +84,7 @@ void loop()
     {  
       if((millis()-startTime) == 1000)
       {
-        setRGB(250,0,0);
+        setRGB(250,0);
          myservo.write(closed);
          buttonPosition = 0;
         //This is where we need to set the arduino to sleep again
@@ -109,12 +111,12 @@ void lockButton(int buttonPosition)
  
   //locks together
   if(buttonPosition == 1){
-   setRGB(0,0,250);   
+   setRGB(250,0);   
 
     myservo.write(closed);
   }
     if(servoPosition == closed){
-      setRGB(0,0,100);
+      setRGB(100,0);
       buttonPosition =0; 
     }
 
@@ -136,15 +138,21 @@ int RFIDscan(int RFIDpin,int RFIDcheck, int red,int green, int red2, int servopo
   if((getScanResults(RFIDpin))&&(RFIDcheck==0)){
       RFIDcheck=1;
       RFIDstartTime = millis();
+  }else if(!(getScanResults(RFIDpin))&&(RFIDcheck==0)){
+     red = 250;
+     green = 0;
+     red2 = 250;
+     servopos = closed;
+     RFIDcheck=1;
   }
   while(RFIDcheck ==1){
   if(RFIDcheck==1){     
-      setRGB(red,green,0);
+      setRGB(red,green);
     
     myservo.write(servopos);
         if((millis()-RFIDstartTime)>=500)
         {
-          setRGB(red2,0,0);        
+          setRGB(red2,0);        
           RFIDcheck = 0;         
         }
   }  }
@@ -154,17 +162,6 @@ int RFIDscan(int RFIDpin,int RFIDcheck, int red,int green, int red2, int servopo
 
 
 
-void automaticClose(){
-
-  
-  //____________________________________________\\
-  /////   This represents the AutoLock\\\\
-  
-  ///This part checks if the cabinet is closed and \\\\
-  ////unlocked and then closses it after 1 seconds\\\\\\
-  
-
-  /////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
   
 
 }
@@ -176,14 +173,14 @@ void automaticClose(){
  //_______________________________________________\\
 ////   This sets the rgb to its distinct colours \\\\
 
-// Red - Bad Scan
+// Red - Bad Scan / Locked
 // Green - Good Scan
-// Blue - Locked
-void setRGB(int red,int green, int blue)
+// Blue - not used
+void setRGB(int red,int green)
 {
       analogWrite(Redpin,red);
     analogWrite(Greenpin,green);
-     // analogWrite(Bluepin,blue);   
+        
 }
 
 ////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\
