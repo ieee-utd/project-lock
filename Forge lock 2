@@ -1,0 +1,213 @@
+//need to include the servo library
+#include <Servo.h> 
+
+//These are the pins variables4
+#define Redpin 6
+#define Bluepin 3
+#define Greenpin 5
+const int buttonPin = 22;
+const int servoPin  = 18;
+const int sensorClosed = 21;
+const int RFIDgood = 23;
+const int RFIDbad = 15;
+
+
+
+//These are the other variables
+int startTime, buttonPosition, RFIDgoodcheck ,RFIDbadcheck, closedCheck, servoPosition,RFIDstartTime,startTimebad,wakeupbutton,open1,closed; 
+
+//This is the servo
+Servo myservo;
+
+
+void setup()
+{
+  //Variables not pins
+  closed = 90;
+  open1 = 0;
+  RFIDgoodcheck = 0;
+  RFIDbadcheck = 0;
+  buttonPosition =0;
+  closedCheck = 0;
+  servoPosition = 0;
+
+
+
+
+  myservo.write(0);   // Represents a closed lock
+  myservo.attach(servoPin);
+  
+  pinMode(Bluepin,OUTPUT);
+  pinMode(Redpin,OUTPUT);
+  pinMode(Greenpin,OUTPUT);
+  
+  pinMode(buttonPin, INPUT);
+  pinMode(RFIDgood, INPUT);
+  pinMode(RFIDbad,INPUT);
+  
+}
+void loop()
+{
+  
+  
+  
+  /////THIS IS THE WAKE UP SEQUENCE\\\\\\
+  /// We need wakeupbutton and buttonpin to be 
+  /// We need to add the wake up part\\\
+
+  servoPosition = myservo.read(); 
+  
+  if((digitalRead(buttonPin)==HIGH)&&(buttonPosition == 0)){  //This is if someone wants to scan a card
+    // If the Scan is good
+      RFIDgoodcheck = RFIDscan(RFIDgood,RFIDgoodcheck,0,250,0,0);  
+    // If the Scan is bad
+      RFIDbadcheck = RFIDscan(RFIDbad,RFIDbadcheck,250,0,250,90);
+      buttonPosition = 1;
+  }
+  if(digitalRead(sensorClosed)==HIGH){
+  if((digitalRead(buttonPin)==HIGH)&&(buttonPosition ==1)){ //This is if somone presses the lock button
+      
+      lockButton(buttonPosition);
+      buttonPosition = 0;
+      //This is where we need to set the arduinon to sleep again
+      }
+  else if((digitalRead(sensorClosed)==HIGH)&&(closedCheck==0)){ //This is if someone forgets to close    
+      if(servoPosition != closed){
+        closedCheck=1;  
+        startTime = millis();     
+      }
+        }  
+  
+    if(closedCheck==1)
+    {  
+      if((millis()-startTime) == 1000)
+      {
+        setRGB(250,0,0);
+         myservo.write(closed);
+         buttonPosition = 0;
+        //This is where we need to set the arduino to sleep again
+        closedCheck =0; 
+              
+        }
+      }
+
+  }
+}
+
+
+
+
+
+
+
+
+ 
+
+
+void lockButton(int buttonPosition)
+{
+ 
+  //locks together
+  if(buttonPosition == 1){
+   setRGB(0,0,250);   
+
+    myservo.write(closed);
+  }
+    if(servoPosition == closed){
+      setRGB(0,0,100);
+      buttonPosition =0; 
+    }
+
+
+  
+  
+
+}
+
+
+
+ //_______________________________________________\\
+/////         RFID SCAN FUNCTION     \\\\
+//This encompases the RFID scan to be general for both scans which means less code
+  
+int RFIDscan(int RFIDpin,int RFIDcheck, int red,int green, int red2, int servopos){
+  
+  
+  if((getScanResults(RFIDpin))&&(RFIDcheck==0)){
+      RFIDcheck=1;
+      RFIDstartTime = millis();
+  }
+  while(RFIDcheck ==1){
+  if(RFIDcheck==1){     
+      setRGB(red,green,0);
+    
+    myservo.write(servopos);
+        if((millis()-RFIDstartTime)>=500)
+        {
+          setRGB(red2,0,0);        
+          RFIDcheck = 0;         
+        }
+  }  }
+  return RFIDcheck;
+}
+/////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+
+
+void automaticClose(){
+
+  
+  //____________________________________________\\
+  /////   This represents the AutoLock\\\\
+  
+  ///This part checks if the cabinet is closed and \\\\
+  ////unlocked and then closses it after 1 seconds\\\\\\
+  
+
+  /////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+  
+
+}
+
+
+
+
+
+ //_______________________________________________\\
+////   This sets the rgb to its distinct colours \\\\
+
+// Red - Bad Scan
+// Green - Good Scan
+// Blue - Locked
+void setRGB(int red,int green, int blue)
+{
+      analogWrite(Redpin,red);
+    analogWrite(Greenpin,green);
+     // analogWrite(Bluepin,blue);   
+}
+
+////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+
+
+
+
+
+
+ //_______________________________________________\\
+///     This checks the state of a given button \\\\\\
+
+// In Final Product it will be replaced with checking 
+// whether a user is recognized in the system.
+
+/////The digitalRead is to be replaced with the RDID Scan code
+
+bool getScanResults(int RFID){
+  if(digitalRead(RFID)==HIGH){///Here is where we check wether the user is recognized
+  return true;                /// If the user is recognized
+  } 
+  else if(digitalRead(RFID)==LOW){
+    return false;             /// If the user is not recognized
+    
+  }  
+}
