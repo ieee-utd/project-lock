@@ -5,7 +5,7 @@
 #define Redpin 6
 #define Bluepin 3
 #define Greenpin 5
-const int buttonPin = 22;
+const int buttonPin = 19;
 const int servoPin  = 18;
 const int sensorClosed = 21;
 const int RFIDgood = 23;
