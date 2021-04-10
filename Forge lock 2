@@ -15,7 +15,8 @@ const int RFIDpin = 23;
 
 
 //These are the other variables
-int startTime, buttonPosition, RFIDcheck, closedCheck, servoPosition,RFIDstartTimef,open1,closed; 
+int startTime, buttonPosition, RFIDcheck, closedCheck, servoPosition,RFIDstartTime,open1,closed;
+bool opencheck; 
 
 //This is the servo
 Servo myservo;
@@ -31,7 +32,8 @@ void setup()
   buttonPosition =0;
   closedCheck = 0;
   servoPosition = 0;
-
+  opencheck = false;
+  
 
 
 
@@ -57,20 +59,32 @@ void loop()
   /// We need to add the wake up part\\\
 
   servoPosition = myservo.read(); 
-  
-  if((digitalRead(buttonPin)==HIGH)&&(buttonPosition == 0)){  //This is if someone wants to scan a card
+  if(digitalRead(buttonPin)==HIGH){
+    buttonPosition =1;
+    startTime = millis();
+    
+  }
+  if(!(opencheck)&&(buttonPosition == 1)){
+    if((millis()-startTime)<4000){
+    
+    //This is if someone wants to scan a card
     // If the Scan is good
       RFIDcheck = RFIDscan(RFIDpin,RFIDcheck,0,250,0,0);  
     // If the Scan is bad
-    if(RFIDcheck ==0){
-      buttonPosition = 1;
+    if((RFIDcheck ==0)&&(servoPosition==open1)){
+      buttonPosition = 0;
+      opencheck = true;
   }
   }
-  if(digitalRead(sensorClosed)==HIGH){
-  if((digitalRead(buttonPin)==HIGH)&&(buttonPosition ==1)){ //This is if somone presses the lock button
+  buttonPosition = 0;
+  }
+  if((digitalRead(sensorClosed)==HIGH)&&(opencheck)){
+  if(buttonPosition ==1){ //This is if somone presses the lock button
       
       lockButton(buttonPosition);
       buttonPosition = 0;
+      opencheck = false;
+      
       //This is where we need to set the arduinon to sleep again
       }
   else if((digitalRead(sensorClosed)==HIGH)&&(closedCheck==0)){ //This is if someone forgets to close    
@@ -82,13 +96,14 @@ void loop()
   
     if(closedCheck==1)
     {  
-      if((millis()-startTime) == 1000)
+      if((millis()-startTime) >= 15000)
       {
         setRGB(250,0);
          myservo.write(closed);
          buttonPosition = 0;
         //This is where we need to set the arduino to sleep again
         closedCheck =0; 
+        opencheck = false;
               
         }
       }
@@ -145,7 +160,7 @@ int RFIDscan(int RFIDpin,int RFIDcheck, int red,int green, int red2, int servopo
      servopos = closed;
      RFIDcheck=1;
   }
-  while(RFIDcheck ==1){
+  
   if(RFIDcheck==1){     
       setRGB(red,green);
     
@@ -155,7 +170,7 @@ int RFIDscan(int RFIDpin,int RFIDcheck, int red,int green, int red2, int servopo
           setRGB(red2,0);        
           RFIDcheck = 0;         
         }
-  }  }
+  }  
   return RFIDcheck;
 }
 /////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -164,7 +179,7 @@ int RFIDscan(int RFIDpin,int RFIDcheck, int red,int green, int red2, int servopo
 
   
 
-}
+
 
 
 
