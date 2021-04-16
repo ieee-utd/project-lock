@@ -1,5 +1,5 @@
 //need to include the servo library
-#include <Servo.h>
+//#include <Servo.h>
 #include <Arduino.h>
 #include <ESP8266WiFi.h> 
 
