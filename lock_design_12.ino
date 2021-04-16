@@ -9,7 +9,8 @@
 #define analogPin A0
 #define Greenpin 5
 const int buttonPin = 19;
-const int servoPin  = 18;
+//const int servoPin  = 18;
+const int magnetPin =12;
 const int sensorClosed = 21;
 const int RFIDpin = 23;
 
@@ -18,30 +19,31 @@ const int RFIDpin = 23;
 
 
 //These are the other variables
-int startTime, buttonPosition, RFIDcheck, closedCheck, servoPosition,RFIDstartTime,open1,closed,voltageIn;
+int startTime, buttonPosition, RFIDcheck, closedCheck,RFIDstartTime,open1,closed,voltageIn,magnetlockstate;
 bool opencheck; 
 
 //This is the servo
-Servo myservo;
+//Servo myservo;
 
 
 void setup()
 {
   //Variables not pins
-  closed = 90;
+  closed = 1;
   open1 = 0;
   RFIDcheck = 0;
 //  RFIDbadcheck = 0;
   buttonPosition =0;
   closedCheck = 0;
-  servoPosition = 0;
+  //servoPosition = 0;
+  magnetlockstate = 0;
   opencheck = false;
   
 
 
 
-  myservo.write(0);   // Represents a closed lock
-  myservo.attach(servoPin);
+ // myservo.write(0);   // Represents a closed lock
+ // myservo.attach(servoPin);
   
  
   pinMode(Redpin,OUTPUT);
@@ -69,7 +71,8 @@ void loop()
     
    }
 
-  servoPosition = myservo.read(); 
+  //servoPosition = myservo.read(); 
+  magnetlockstate = digitalRead(magnetPin);
   if(digitalRead(buttonPin)==HIGH){
     buttonPosition =1;
     startTime = millis();
@@ -82,7 +85,7 @@ void loop()
     // If the Scan is good
       RFIDcheck = RFIDscan(RFIDpin,RFIDcheck,0,250,0,0);  
     // If the Scan is bad
-    if((RFIDcheck ==0)&&(servoPosition==open1)){
+    if((RFIDcheck ==0)&&(magnetlockstate==open1)){
       buttonPosition = 0;
       opencheck = true;
   }
@@ -95,12 +98,12 @@ void loop()
       lockButton(buttonPosition);
       buttonPosition = 0;
       opencheck = false;
-      goToSleep();
+     // goToSleep();
       
       //This is where we need to set the arduinon to sleep again
       }
   else if((digitalRead(sensorClosed)==HIGH)&&(closedCheck==0)){ //This is if someone forgets to close    
-      if(servoPosition != closed){
+      if(magnetlockstate != closed){
         closedCheck=1;  
         startTime = millis();     
       }
@@ -111,12 +114,13 @@ void loop()
       if((millis()-startTime) >= 1000)
       {
         setRGB(250,0);
-         myservo.write(closed);
+         //myservo.write(closed);
+         digitalWrite(magnetPin,HIGH);
          buttonPosition = 0;
         //This is where we need to set the arduino to sleep again
         closedCheck =0; 
         opencheck = false;
-        goToSleep();
+        //goToSleep();
               
         }
       }
@@ -126,12 +130,12 @@ void loop()
 
 
 
-
+/*
 void goToSleep(){
 ESP.deepSleep(0);
 
 }
-
+*/ 
 
 
  
@@ -144,9 +148,10 @@ void lockButton(int buttonPosition)
   if(buttonPosition == 1){
    setRGB(250,0);   
 
-    myservo.write(closed);
+   // myservo.write(closed);
+    digitalWrite(magnetPin,HIGH);
   }
-    if(servoPosition == closed){
+    if(magnetlockstate == closed){
       setRGB(100,0);
       buttonPosition =0; 
     }
@@ -163,7 +168,7 @@ void lockButton(int buttonPosition)
 /////         RFID SCAN FUNCTION     \\\\
 //This encompases the RFID scan to be general for both scans which means less code
   
-int RFIDscan(int RFIDpin,int RFIDcheck, int red,int green, int red2, int servopos){
+int RFIDscan(int RFIDpin,int RFIDcheck, int red,int green, int red2, int magnetpos){
   
   
   if((getScanResults(RFIDpin))&&(RFIDcheck==0)){
@@ -173,14 +178,15 @@ int RFIDscan(int RFIDpin,int RFIDcheck, int red,int green, int red2, int servopo
      red = 250;
      green = 0;
      red2 = 250;
-     servopos = closed;
+     magnetpos = closed;
      RFIDcheck=1;
   }
   
   if(RFIDcheck==1){     
       setRGB(red,green);
     
-    myservo.write(servopos);
+    //myservo.write(servopos);
+     digitalWrite(magnetPin,magnetpos);
         if((millis()-RFIDstartTime)>=500)
         {
           setRGB(red2,0);        
