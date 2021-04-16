@@ -37,7 +37,7 @@ void setup()
   closedCheck = 0;
   //servoPosition = 0;
   magnetlockstate = 0;
-  opencheck = false;
+  opencheck = true;
   
 
 
@@ -92,7 +92,8 @@ void loop()
   }
   buttonPosition = 0;
   }
-  if((digitalRead(sensorClosed)==HIGH)&&(opencheck)){
+  //original was if digitalread sensor closed == high
+  if((true)&&(opencheck)){
   if(buttonPosition ==1){ //This is if somone presses the lock button
       
       lockButton(buttonPosition);
@@ -102,7 +103,8 @@ void loop()
       
       //This is where we need to set the arduinon to sleep again
       }
-  else if((digitalRead(sensorClosed)==HIGH)&&(closedCheck==0)){ //This is if someone forgets to close    
+      //original was if digitalread sensor closed == high
+  else if((true)&&(closedCheck==0)){ //This is if someone forgets to close    
       if(magnetlockstate != closed){
         closedCheck=1;  
         startTime = millis();     
