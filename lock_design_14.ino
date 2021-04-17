@@ -39,7 +39,7 @@ void setup()
   magnetlockstate = 0;
   opencheck = true;
   
-
+ digitalWrite(magnetPin,LOW);
 
 
  // myservo.write(0);   // Represents a closed lock
