@@ -3,6 +3,7 @@ int buttonstate, startTime, buttonchange,startTimeRFID;
 int goodscan, badscan, noscan,scancheck;
 int truecheck;
 int redblinktime;
+int noscanblinktime;
 int isopen,isclosed;
 bool hasBeenOpened = false;
 /////////////////////////////
@@ -74,6 +75,14 @@ void loop() {
           }
         }
         if (buttonstate == 1) {
+          noscanblinktime = millis();
+          digitalWrite(magnetPin,HIGH);
+          ledcontrol(0,0);
+          while((millis()-noscanblinktime)<500){
+                Serial.println("no scan wait");
+          
+          }
+          ledcontrol(0,1);
           //go to sleep
           hasBeenOpened = false;
           buttonstate = 0;
