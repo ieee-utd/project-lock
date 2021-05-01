@@ -10,14 +10,12 @@ bool hasBeenOpened = false;
 /////////////////////////////
 #define SS_PIN 21  //D2
 #define RST_PIN 22 //D1
-
 #define buttonPin 33
 #define magnetPin 25
 #define redPin 27
 #define greenPin 26
 #include <SPI.h>
 #include <MFRC522.h>
-
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.
 int statuss = 0;
 int out = 0;
@@ -28,11 +26,8 @@ void setup() {
   truecheck = 0;
   isopen = 650;
   isclosed = 25;
- 
- scancheck = 0;
- 
+  scancheck = 0;
   buttonstate = 0;
-
   goodscan = 2;
   badscan = 1;
   noscan = 0;
@@ -45,7 +40,6 @@ void setup() {
   pinMode(redPin,OUTPUT);
   pinMode(greenPin,OUTPUT);
 }
-
 void loop() {
   if ((buttonstate == 0) && (digitalRead(33)==HIGH)) {
     buttonchange = 1;
@@ -59,10 +53,8 @@ void loop() {
     rfid = "";
     buttonstate = 1;
     buttonchange = 0;
-    Serial.println("button was released");
-    
+    Serial.println("button was released"); 
   }
- 
     if (buttonstate == 1) {
       Serial.println("button state = 1");
       if ((hasBeenOpened == false)) {
@@ -70,7 +62,6 @@ void loop() {
           Serial.println("begining of scan");
           if (RFIDScan(startTimeRFID) == true) {
             Serial.println("a scan");
-
             buttonstate = 0;
             if (truecheck == 1) {
               hasBeenOpened = true;
@@ -82,8 +73,7 @@ void loop() {
           digitalWrite(magnetPin,HIGH);
           ledcontrol(0,0);
           while((millis()-noscanblinktime)<500){
-                Serial.println("no scan wait");
-          
+                Serial.println("no scan wait");        
           }
           ledcontrol(0,1);
           //go to sleep
@@ -96,14 +86,9 @@ void loop() {
         digitalWrite(magnetPin, 1);
         buttonstate = 0;
         hasBeenOpened = false;
-
       }
-
     }
-  
-
 }
-
 bool RFIDScan(int startTimeRFID) {
   int scanresults = getScanResults(startTimeRFID);
   if (scanresults == goodscan) {
@@ -119,11 +104,9 @@ bool RFIDScan(int startTimeRFID) {
     digitalWrite(magnetPin, HIGH);
     ledcontrol(0,0);
     while((millis()-redblinktime)<500){
-      Serial.println("red wair");
-      
+      Serial.println("red wair");    
     }
-    ledcontrol(0,1); //green on, red off
-    
+    ledcontrol(0,1); //green on, red off 
     truecheck = 0;
     return true;
   }
@@ -135,18 +118,18 @@ bool RFIDScan(int startTimeRFID) {
 void ledcontrol(int green, int red) {
   Serial.println("led is changed");
   if(green ==1){
-  digitalWrite(greenPin, HIGH);
-  Serial.println("Green on");
+    digitalWrite(greenPin, HIGH);
+    Serial.println("Green on");
   }
   if(green ==0){
-digitalWrite(greenPin, LOW);
-}
+    digitalWrite(greenPin, LOW);
+  }
   if( red ==1){
-  digitalWrite(redPin, HIGH);
+    digitalWrite(redPin, HIGH);
   }
   if( red ==0){
-digitalWrite(redPin, LOW);
-}
+    digitalWrite(redPin, LOW);
+ }
 }
 
 
