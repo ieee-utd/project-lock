@@ -173,7 +173,7 @@ int getScanResults(int startTimeRFID) {
   Serial.print(" UID tag :" + content.substring(1));
   rfid = content.substring(1);
   Serial.println();
-  if (rfid == "C7 6D FC D8") //change UID of the card that you want to give access
+  if (rfid.equals("C7 6D FC D8")) //change UID of the card that you want to give access
   {
     //this is where instead of checking the value we need to check if the log in works
     statuss = 1;
